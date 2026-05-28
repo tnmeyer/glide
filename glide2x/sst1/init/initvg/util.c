@@ -28,6 +28,10 @@
 #endif
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef __GNUC__
+#include <unistd.h>
+#endif
+#include <time.h>
 #include <math.h>
 #include <sst.h>
 #define FX_DLL_DEFINITION
@@ -161,7 +165,14 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitIdleFBINoNOP(FxU32 *sstbase)
 FX_EXPORT FxU32 FX_CSTYLE sst1InitReturnStatus(FxU32 *sstbase)
 {
     volatile Sstregs *sst = (Sstregs *) sstbase;
+    volatile FxU32 n;
+    extern FxU32 InitDelay;
 
+#if defined(__WATCOMC__) || defined(__MSC__)
+    for(n=0; n<InitDelay; n++) {}
+#elif defined(__GNUC__)
+    nanosleep((const struct timespec[]){{0, InitDelay}}, NULL);
+#endif
     return(IGET(sst->status));
 }
 

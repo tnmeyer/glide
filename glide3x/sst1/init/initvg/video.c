@@ -34,6 +34,13 @@
 #include <sst1vid.h>
 #include <sst1init.h>
 
+/* Global delay value for status register reads */
+#if defined(__WATCOMC__) || defined(__MSC__)
+FxU32 InitDelay = 250; /* arbitrary loop count for Watcom/MSVC */
+#else
+FxU32 InitDelay = 25; /* in nanoseconds for POSIX/nanosleep */
+#endif
+
 /*
 ** sst1InitVideo():
 **  Initialize video (including DAC setup) for the specified resolution
@@ -307,6 +314,12 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitVideo(FxU32 *sstbase,
                 break;
         }
         sst1CurrentBoard->fbiVideoRefresh = sst1MonitorRefresh;
+    }
+	
+    envp = GETENV(("SST_INITDELAY"));
+    if(envp) {
+        InitDelay = ATOI(envp);
+        INIT_PRINTF(("sst1InitVideo(): Setting InitDelay to %d\n", InitDelay));
     }
 
     envp = GETENV(("SST_VIDEO_24BPP"));
