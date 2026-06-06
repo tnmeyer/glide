@@ -20,6 +20,17 @@ void single_precision_asm()
     fldcw WORD PTR [esp]
     pop   eax
     }
+#elif defined(__WATCOMC__)
+  __asm {
+    push  eax       ; make room
+    fnclex          ; clear pending exceptions
+    fstcw WORD PTR [esp]
+    mov   eax, DWORD PTR [esp]
+    and   eax, 0000fcffh  ; clear bits 9:8
+    mov   DWORD PTR [esp], eax
+    fldcw WORD PTR [esp]
+    pop   eax
+    }
 #elif defined(__GNUC__)
   asm("push %eax\n"
       "fnclex\n"
@@ -48,6 +59,18 @@ void single_precision_asm()
 void double_precision_asm()
 {
 #if defined(__MSC__)
+  __asm {
+    push  eax       ; make room
+    fnclex          ; clear pending exceptions
+    fstcw WORD PTR [esp]
+    mov   eax, DWORD PTR [esp]
+    and   eax, 0000fcffh  ; clear bits 9:8
+    or    eax, 000002ffh  ; set 9:8 to 10
+    mov   DWORD PTR [esp], eax
+    fldcw WORD PTR [esp]
+    pop   eax
+    }
+#elif defined(__WATCOMC__)
   __asm {
     push  eax       ; make room
     fnclex          ; clear pending exceptions

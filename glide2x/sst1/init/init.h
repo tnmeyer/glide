@@ -68,7 +68,8 @@ extern "C" {
      */
 /* 3Dfx Voodoo Graphics */
 #define TDFXVID         0x121A
-#define SST1DID         0x01  
+#define SST1DID         0x01
+#define CVGDID          0x02
 
 /* Alliance AT3D */
 #define AT3DVID         0x1142

@@ -2446,6 +2446,11 @@ extern FxU16 *rle_line_end;
 #define RLE_CODE                        0xE0
 #define NOT_RLE_CODE            31
 
+#ifdef GLIDE211_COMPAT
+extern GrOriginLocation_t compat_origin;
+extern GrLfbWriteMode_t compat_mode;
+#endif
+
 #ifdef  __WATCOMC__
 #pragma aux rle_decode_line_asm parm [edx] [edi] [esi] value [edi] modify exact [eax ebx ecx edx esi edi] = \
 "  next_pixel:                   "  \
@@ -2492,10 +2497,10 @@ _grErrorCallback(const char* const procName,
 /*extern FxU32 GR_CDECL
 _cpu_detect_asm(void);*/
 
-extern void GR_CDECL 
+extern void
 single_precision_asm(void);
 
-extern void GR_CDECL 
+extern void
 double_precision_asm(void);
 
 #if (GLIDE_PLATFORM & GLIDE_HW_CVG)

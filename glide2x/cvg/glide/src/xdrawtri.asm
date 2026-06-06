@@ -44,3 +44,7 @@ export  grDrawTriangle@12
 export _grDrawTriangle@12
 %endif
 %endif ; _WIN32
+
+%if XOS == XOS_WATCD
+export  _grDrawTriangle@12
+%endif ; __WATCOM__

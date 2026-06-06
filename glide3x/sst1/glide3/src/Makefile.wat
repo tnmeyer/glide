@@ -39,6 +39,7 @@
 ###############################################################################
 
 GLIDE_LIB = glide3x.lib
+GLIDE_DLL = glide3x.ovl
 TEXUS_EXE = texus2.exe
 
 FX_GLIDE_HW ?= sst1
@@ -53,6 +54,8 @@ TEXUS_EXEDIR = $(FX_GLIDE_SW)/bin
 CC = wcl386
 AS = nasm
 AR = wlib
+GCC = gcc
+LD = wlink
 
 # detect if running under unix by finding 'rm' in $PATH :
 ifeq ($(wildcard $(addsuffix /rm,$(subst :, ,$(PATH)))),)
@@ -70,7 +73,7 @@ endif
 ###############################################################################
 
 # platform
-CDEFS = -D__DOS__ -D__DOS32__ -DINIT_DOS
+CDEFS = -D__DOS__ -D__DOS32__ -DINIT_DOS -DFX_DLL_ENABLE
 
 # general
 CDEFS += -DGLIDE3 -DGLIDE3_ALPHA -DGLIDE_HARDWARE
@@ -112,14 +115,15 @@ ARFLAGS = -c -fo -n -t -q
 
 # linker
 # pick either of causeway, dos4g, dos32a or stub32a as link target
-LDFLAGS = -zq -k16384 -l=dos32a
+LDFLAGS = -zq -k16384 -l=dos4g
 
 # assembler
 ASFLAGS = -O6 -fobj -D__WATCOMD__ --prefix _
 ASFLAGS += $(CDEFS)
 
 # compiler
-CFLAGS = -bt=dos -wx -zq
+#CFLAGS = -bt=dos -wx -zq
+CFLAGS = -zq -we -5s -ohtx -bd -ecd -fpi87 -bt=dos
 # newer OpenWatcom versions enable W303 by default
 CFLAGS += -wcd=303
 INCPATH = -I. -I../../incsrc -I../../init
@@ -257,7 +261,8 @@ all: glide3x $(TEXUS_EXEDIR)/$(TEXUS_EXE)
 glide3x: $(GLIDE_LIBDIR)/$(GLIDE_LIB)
 
 $(GLIDE_LIBDIR)/$(GLIDE_LIB): wlib.lbc
-	$(AR) $(ARFLAGS) -o $(call FIXPATH,$@) @wlib.lbc
+	$(AR) $(ARFLAGS) $(call FIXPATH,$@) @wlib.lbc
+	$(LD) @glideovl.lnk
 
 $(TEXUS_EXEDIR)/$(TEXUS_EXE): $(FX_GLIDE_SW)/texus2/cmd/cmd.c $(GLIDE_LIBDIR)/$(GLIDE_LIB)
 ifeq ($(TEXUS2),1)
@@ -287,10 +292,11 @@ fxgasm.h: fxgasm.exe
 
 # -bt without args resets build target to host OS.
 fxgasm.exe: fxgasm.c
-	$(CC) $(CFLAGS) -bt -fe=$@ $<
+	$(GCC) $(INCPATH) -o $@ $<
 
 wlib.lbc: $(call FIXPATH,$(GLIDE_OBJECTS))
 	@echo $(addprefix +,$^) > wlib.lbc
+	@echo $(call FIXPATH,$(GLIDE_OBJECTS)) > glide_objs.lnk
 
 ###############################################################################
 #	clean, realclean

@@ -200,6 +200,12 @@ pciUnmapLinear9x( unsigned long linear_addr, FxU32 length )
                          NULL, 0,
                          &nret, NULL);
 }
+#define _inp  inp
+#define _inpw inpw
+#define _inpd inpd
+#define _outp outp
+#define _outpw outpw
+#define _outpd outpd
 
 /* Platform port io stuff */
 #ifdef  __GNUC__				/* __MINGW32__ */

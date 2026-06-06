@@ -53,7 +53,7 @@
 .PHONY: all clean realclean
 
 export BUILD_NUMBER = 40404
-export FX_GLIDE_HW ?= h5
+export FX_GLIDE_HW ?= sst1
 
 ifeq ($(FX_GLIDE_HW),sst96)
 G3_DIR = sst1/glide3/src

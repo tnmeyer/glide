@@ -264,7 +264,7 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitIdleFBINoNOP(FxU32 *sstbase)
     if(!sst)
         return(FXFALSE);
 
-    // ISET(sst->nopCMD, 0x0);
+    ISET(sst->nopCMD, 0x0);
     cntr = 0;
     while(1) {
         if(!(sst1InitReturnStatus(sstbase) & SST_FBI_BUSY)) {

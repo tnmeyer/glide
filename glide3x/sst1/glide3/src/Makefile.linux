@@ -122,7 +122,7 @@ ASFLAGS = -O6 -felf -D__linux__
 ASFLAGS += $(CDEFS)
 
 # compiler
-CFLAGS = -Wall
+CFLAGS = -Wall -m32
 CFLAGS += -I. -I../../incsrc -I../../init
 ifeq ($(FX_GLIDE_HW),sst1)
 CFLAGS += -I../../init/initvg
@@ -282,11 +282,11 @@ $(GLIDE_LIBDIR)/$(GLIDE_SO_X): $(GLIDE_LIBDIR)/$(GLIDE_SHARED)
 	ln -fs $(GLIDE_SHARED) $(GLIDE_LIBDIR)/$(GLIDE_SO_X)
 
 $(GLIDE_LIBDIR)/$(GLIDE_SHARED): $(GLIDE_OBJECTS:.o=.lo)
-	$(CC) -o $@ -shared -Wl,--no-undefined -Wl,-soname,$(GLIDE_SONAME) $^ $(LDFLAGS) $(LDLIBS)
+	$(CC) -m32 -o $@ -shared -Wl,--no-undefined -Wl,-soname,$(GLIDE_SONAME) $^ $(LDFLAGS) $(LDLIBS)
 
 $(TEXUS_EXEDIR)/$(TEXUS_EXE): $(FX_GLIDE_SW)/texus2/cmd/cmd.c $(GLIDE_LIBDIR)/$(GLIDE_LIB)
 ifeq ($(TEXUS2),1)
-	$(CC) -o $@ -s $(CFLAGS) -L$(GLIDE_LIBDIR) $< -lglide3x -lm
+	$(CC) -m32 -o $@ -s $(CFLAGS) -L$(GLIDE_LIBDIR) $< -lglide3x -lm
 else
 	$(warning Texus2 not enabled... Skipping $(TEXUS_EXE))
 endif

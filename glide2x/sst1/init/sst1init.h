@@ -41,12 +41,12 @@
 
 /* Init code debug print routine */
 #ifdef INIT_DOS /* Glide version... */
-#define INIT_OUTPUT
+#define INIT_OUTPUT 1
 #define INIT_PRINTF(a) sst1InitPrintf a
 #define INIT_INFO(A)
 #endif
 #ifdef INIT_LINUX
-#define INIT_OUTPUT
+#define INIT_OUTPUT 1
 #define INIT_PRINTF(a) sst1InitPrintf a
 #define INIT_INFO(A)
 #endif
@@ -1235,6 +1235,7 @@ extern "C" {
 
 extern sst1VideoTimingStruct SST_VREZ_640X480_60;
 extern sst1VideoTimingStruct SST_VREZ_800X600_60;
+extern FxBool sst1CvgCompat;
 
 #ifdef __cplusplus
 }

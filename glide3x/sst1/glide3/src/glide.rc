@@ -64,7 +64,7 @@ BEGIN
             VALUE "InternalName", VERSIONNAME
             VALUE "LegalCopyright", "Copyright \251 3Dfx Interactive, Inc. 1997\0"
             VALUE "OriginalFilename", VERSIONNAME
-            VALUE "ProductName", PRODNAME
+//            VALUE "ProductName", PRODNAME
             VALUE "ProductVersion", VERSIONSTR
             VALUE "Graphics Subsystem", HWSTR
         END

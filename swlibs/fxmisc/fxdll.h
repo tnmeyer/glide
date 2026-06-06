@@ -65,10 +65,10 @@
 
     #elif defined(__WATCOMC__)
       #define FX_ENTRY
-      #define FX_CALL __stdcall __export
+      #define FX_CALL __export __stdcall
 
       #define FX_EXPORT
-      #define FX_CSTYLE __stdcall __export
+      #define FX_CSTYLE __export __stdcall
 
     #else /* compiler */
       #error define FX_ENTRY,FX_CALL & FX_EXPORT,FX_CSTYLE for your compiler

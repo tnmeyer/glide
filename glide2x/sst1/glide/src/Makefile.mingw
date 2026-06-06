@@ -45,9 +45,16 @@
 ###############################################################################
 
 GLIDE_RES = glide.res
+
+ifeq ($(GLIDE211),1)
+GLIDE_DLL = glide.dll
+GLIDE_DEF = glide.def
+GLIDE_IMP = libglide.dll.a
+else
 GLIDE_DLL = glide2x.dll
 GLIDE_DEF = glide2x.def
 GLIDE_IMP = libglide2x.dll.a
+endif
 
 FX_GLIDE_HW ?= sst1
 FX_GLIDE_SW = ../../../swlibs
@@ -79,6 +86,7 @@ AS = nasm
 LD = $(CC)
 RC = $(CROSS)windres
 DLLTOOL = $(CROSS)dlltool
+DLLWRAP = $(CROSS)dllwrap
 STRIP = $(CROSS)strip
 
 ifeq ($(WINMODE),1)
@@ -130,10 +138,11 @@ CDEFS += -DGLIDE_PLUG -DGLIDE_SPLASH
 ###############################################################################
 
 # linker
-LDFLAGS = -shared -m32 -Wl,--enable-auto-image-base -Wl,--no-undefined
+LDFLAGS = -shared -m32 -Wl,--enable-auto-image-base -Wl,--no-undefined -Wl,--enable-stdcall-fixup -Wl,--leading-underscore -Wl,--enable-auto-import
 #	 -Xlinker --output-def -Xlinker $(GLIDE_LIBDIR)/$(GLIDE_DEF)
 #	 -Xlinker --out-implib -Xlinker $(GLIDE_LIBDIR)/$(GLIDE_IMP)
 DLLTOOL_FLAGS = --as-flags=--32 -m i386 -U
+DLWRAP_FLAGS = --as-flags=--32 -m i386 -U
 #DLLTOOL_FLAGS+= -k
 
 # assembler
@@ -150,6 +159,11 @@ LDLIBS = -luser32 -lkernel32
 ifeq ($(FX_GLIDE_HW),sst96)
 LDLIBS += -lgdi32 -lddraw -ldxguid
 endif
+
+ifdef GLIDE211
+CFLAGS += -DGLIDE211_COMPAT
+endif
+
 ifdef DEBUG
 CFLAGS += -g
 else
@@ -274,6 +288,8 @@ glide2x: $(GLIDE_LIBDIR)/$(GLIDE_DLL) $(GLIDE_LIBDIR)/$(GLIDE_IMP)
 $(GLIDE_LIBDIR)/$(GLIDE_DEF): $(GLIDE_LIBDIR)/$(GLIDE_DLL)
 $(GLIDE_LIBDIR)/$(GLIDE_DLL): $(GLIDE_OBJECTS) $(GLIDE_RES)
 	$(LD) -o $@ $(LDFLAGS) -Xlinker --output-def -Xlinker $(GLIDE_LIBDIR)/$(GLIDE_DEF) \
+		$(GLIDE_OBJECTS) $(LDLIBS) $(GLIDE_RES)
+	$(DLLWRAP) -o $@ $(DLLWRAP_FLAGS) -Wl,--enable-stdcall-fixup -Wl,--enable-auto-import --def glide_msvc.def \
 		$(GLIDE_OBJECTS) $(LDLIBS) $(GLIDE_RES)
 $(GLIDE_LIBDIR)/$(GLIDE_IMP): $(GLIDE_LIBDIR)/$(GLIDE_DLL)
 	$(DLLTOOL) $(DLLTOOL_FLAGS) --dllname $(GLIDE_DLL) --input-def $(GLIDE_LIBDIR)/$(GLIDE_DEF) --output-lib $@

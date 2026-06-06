@@ -999,6 +999,32 @@ GR_ENTRY(grSstWinOpen, FxBool, (
   GR_RETURN( rv );
 } /* grSstWinOpen */
 
+#if defined(GLIDE211_COMPAT)
+GR_ENTRY(grSstOpen, FxBool,
+	(GrScreenResolution_t screen_resolution,
+         GrScreenRefresh_t    refresh_rate,
+         GrColorFormat_t      color_format,
+         GrOriginLocation_t   origin_location,
+         GrSmoothingMode_t    smoothing_filter,
+         int                  num_buffers ))
+{
+	FxBool rv = FXFALSE;
+	extern GrOriginLocation_t compat_origin;
+	extern GrLfbWriteMode_t compat_mode;
+
+	compat_mode = GR_LFBWRITEMODE_555;
+	compat_origin = origin_location;
+	rv = grSstWinOpen(-1, screen_resolution, refresh_rate, color_format, origin_location, num_buffers, 1);
+	return rv;
+}
+
+GR_ENTRY(grSstPassthruMode, void, (GrPassthruMode_t mode))
+{
+    return;
+}
+
+#endif
+
 /*-------------------------------------------------------------------
   Function: grSstWinClose
   Date: 3/16

@@ -37,10 +37,15 @@
 ###############################################################################
 #	general defines (user settable?)
 ###############################################################################
-
+ifeq ($(GLIDE211),1)
+GLIDE_RES = glide.res
+GLIDE_DLL = glide.dll
+GLIDE_IMP = glide.lib
+else
 GLIDE_RES = glide.res
 GLIDE_DLL = glide2x.dll
 GLIDE_IMP = glide2x.lib
+endif
 
 FX_GLIDE_HW ?= sst1
 FX_GLIDE_SW = ../../../swlibs
@@ -90,6 +95,10 @@ endif
 # debug
 ifdef DEBUG
 CDEFS += -DGDBG_INFO_ON -DGLIDE_DEBUG -DGLIDE_SANITY_ASSERT -DGLIDE_SANITY_SIZE
+endif
+
+ifeq ($(GLIDE211),1)
+CDEFS += -DGLIDE211_COMPAT
 endif
 
 # other
@@ -247,10 +256,10 @@ xdraw96.obj: xdraw96.asm
 $(GLIDE_OBJECTS): fxinline.h fxgasm.h
 
 fxinline.h: fxgasm.exe
-	.\$< -inline > $@
+	$< -inline > $@
 
 fxgasm.h: fxgasm.exe
-	.\$< -hex > $@
+	$< -hex > $@
 
 fxgasm.exe: fxgasm.c
 	$(CC) -o $@ $(CFLAGS) $<

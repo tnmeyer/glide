@@ -86,6 +86,7 @@ static FxU32
   numSst1s;                     /* # SST1s in system */
 static FxBool
   libInitialized;               /* Well, has it been? */
+FxBool sst1CvgCompat = FXFALSE;
 
 /*-------------------------------------------------------------------
   Function: initEnumHardware
@@ -124,12 +125,11 @@ initEnumHardware( InitHWEnumCallback *cb )
 
         GDBG_INFO((80, "initEnumHardware:  Vendor:  0x%x  Device:  0x%x\n", vId, dId));
 
-#if defined( SST1 )
+#if defined(SST1)
         if ( (vId == TDFXVID) &&
-            (dId == SST1DID) ) { /* Detect SST1 */
+            ((dId == SST1DID) || (dId == CVGDID)) ) { /* Detect SST1 and CVG */
           FxU32 *base;
           sst1DeviceInfoStruct info;
-
           /* Scanline interleave must be two boards back to back
              if there is a second board in the system,
              and the previous board was SLI, then this is the slave */
@@ -266,8 +266,7 @@ initMapBoard(const FxU32 boardNum)
       
 #if defined(SST1)
       okP = ((vId == TDFXVID) &&
-             (dId == SST1DID));
-
+             ((dId == SST1DID) || (dId == CVGDID)) );
       if (okP) {
          retVal = sst1InitMapBoard(boardNum);
          sst1InitRegisters((FxU32*)retVal);
@@ -334,7 +333,6 @@ FxBool
 initGetDeviceInfo( FxU32 devNumber, InitDeviceInfo *info )
 {
     FxBool rv;
-
     if ( devNumber < numDevicesInSystem ) {
         *info = hwInfo[devNumber];
         rv = FXTRUE;
@@ -787,6 +785,11 @@ FxU32 initNumBoardsInSystem(void)
 #if defined(SST1)
         for(j=0; j<INIT_MAX_DEVICES; j++) {
             if(pciFindCardMulti(TDFXVID, SST1DID, &n, j)) numBoards++;
+        }
+        if (numBoards == 0) {
+		for(j=0; j<INIT_MAX_DEVICES; j++) {
+		if(pciFindCardMulti(TDFXVID, CVGDID, &n, j)) numBoards++;
+	    }
         }
 #elif defined(SST96)
         for(j=0; j<INIT_MAX_DEVICES; j++) {

@@ -252,6 +252,11 @@ sst1InitGetTmuMemory(FxU32 *sstbase, sst1DeviceInfoStruct *info, FxU32 tmu,
 	return(FXTRUE);
     }
 
+    if (sst1CvgCompat) {
+	*TmuMemorySize = 2;
+	return(FXTRUE);
+    }
+
     ISET(sst->lfbMode, SST_LFB_RGBALANES_ARGB | SST_LFB_READFRONTBUFFER);
     ISET(sst->fbzMode, SST_DRAWBUFFER_FRONT | SST_RGBWRMASK);
     ISET(sst->fbzColorPath,

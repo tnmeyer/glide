@@ -1438,6 +1438,42 @@ grLfbReadRegion( GrBuffer_t src_buffer,
                  FxU32 src_width, FxU32 src_height,
                  FxU32 dst_stride, void *dst_data );
 
+#if defined(GLIDE211_COMPAT)
+
+FX_ENTRY void FX_CALL
+grLfbBegin( void );
+
+FX_ENTRY void FX_CALL
+grLfbEnd( void );
+
+FX_ENTRY const FxU32 * FX_CALL
+grLfbGetReadPtr( GrBuffer_t buffer );
+
+FX_ENTRY void * FX_CALL
+grLfbGetWritePtr( GrBuffer_t buffer );
+
+FX_ENTRY void FX_CALL
+grLfbWriteMode( GrLfbWriteMode_t mode );
+
+FX_ENTRY void FX_CALL
+grLfbOrigin(GrOriginLocation_t origin);
+
+FX_ENTRY void FX_CALL
+grLfbBypassMode( GrLfbBypassMode_t mode );
+
+FX_ENTRY FxBool FX_CALL
+grSstOpen(
+          GrScreenResolution_t screen_resolution,
+          GrScreenRefresh_t    refresh_rate,
+          GrColorFormat_t      color_format,
+          GrOriginLocation_t   origin_location,
+          GrSmoothingMode_t    smoothing_filter,
+          int                  num_buffers );
+
+FX_ENTRY void FX_CALL
+grSstPassthruMode( GrPassthruMode_t mode);
+
+#endif
 
 /*
 **  Antialiasing Functions

@@ -154,6 +154,7 @@ FX_EXPORT FxU32 * FX_CSTYLE sst1InitMapBoard(FxU32 BoardNumber)
     FxU32 *sst;
     volatile Sstregs *sstptr;
     FxU32 n, j;
+    extern FxBool sst1CvgCompat;
 
     if(firstTime) {
         /* Find "voodoo.ini" file if it exists... */
@@ -179,16 +180,25 @@ FX_EXPORT FxU32 * FX_CSTYLE sst1InitMapBoard(FxU32 BoardNumber)
         /* Check that scanline interleaving is not enabled... */
         for(j=0; j<SST1INIT_MAX_BOARDS; j++) {
           FxU32 vendorID = _3DFX_PCI_ID;     /* 3Dfx Vendor ID */
+          FxU32 deviceIDCvg = 2;             /* Find only cvg boards */
           FxU32 deviceID = 1;                /* Find only sst1 boards */
 
 #ifndef DIRECTX
-            sst = pciMapCardMulti(vendorID, deviceID, sizeOfCard,
-                &sst1InitDeviceNumber, j, 0);
+            sst = pciMapCardMulti(vendorID, deviceID, sizeOfCard, &sst1InitDeviceNumber, j, 0);
 #else
-            sst = pciMapCardMulti(vendorID, deviceID, sizeOfCard, 
-                &sst1InitDeviceNumber, j, 0);
+            sst = pciMapCardMulti(vendorID, deviceID, sizeOfCard, &sst1InitDeviceNumber, j, 0);
 #endif /* DIRECTX */
+
+            if (!sst) {
+		sst = pciMapCardMulti(vendorID, deviceIDCvg, sizeOfCard, &sst1InitDeviceNumber, j, 0);
+		if (sst) sst1CvgCompat = FXTRUE;
+            }
+
             if(sst) {
+		if (sst1CvgCompat) {
+		    INIT_PRINTF(("sst1InitMapBoard(): CVG chipset detected, switching to Voodoo2 compatibility mode\n"));
+		    printf("CVG chipset detected, switching to Voodoo2 compatibility mode\n");
+		}
                 sst1BoardInfo[j].virtAddr = sst;
                 PCICFG_RD(PCI_BASE_ADDRESS_0, sst1BoardInfo[j].physAddr);
                 sst1BoardInfo[j].deviceNumber = sst1InitDeviceNumber;
@@ -850,6 +860,7 @@ void sst1InitClearBoardInfo(void)
 FX_ENTRY FxU32 FX_CSTYLE sst1InitNumBoardsInSystem(void)
 {
     FxU32 vendorID = _3DFX_PCI_ID;     /* 3Dfx Vendor ID */
+    FxU32 deviceIDCvg = 2;                /* Find only sst1 boards */
     FxU32 deviceID = 1;                /* Find only sst1 boards */
     FxU32 numBoards, j, n;
 
@@ -857,10 +868,17 @@ FX_ENTRY FxU32 FX_CSTYLE sst1InitNumBoardsInSystem(void)
         numBoards = ATOI(GETENV(("SST_BOARDS")));
     else {
         numBoards = 0;
-        for(j=0; j<SST1INIT_MAX_BOARDS; j++) {
+        for(j=0; j<SST1INIT_MAX_BOARDS; j++) { /* Find SST1 boards first */
             if(pciFindCardMulti(vendorID, deviceID, &n, j))
                 numBoards++;
         }
+	if (numBoards == 0) {
+	    for(j=0; j<SST1INIT_MAX_BOARDS; j++) { /* Try finding CVG boards if no SST1 was found */
+        	if(pciFindCardMulti(vendorID, deviceIDCvg, &n, j))
+            	    numBoards++;
+            }
+        }
+
     }
     return(numBoards);
 }

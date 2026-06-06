@@ -93,7 +93,9 @@
 #include <glide.h>
 #include "fxglide.h"
 
+#if !defined(__WATCOMC__)
 #include <memory.h>
+#endif
 
 #define SST_XY_HALF      ( 1 << ( SST_XY_FRACBITS - 1 ) )
 #define SST_XY_ONE       ( 1 << SST_XY_FRACBITS )

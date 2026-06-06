@@ -34,13 +34,6 @@
 #include <sst1vid.h>
 #include <sst1init.h>
 
-/* Global delay value for status register reads */
-#if defined(__WATCOMC__) || defined(__MSC__)
-FxU32 InitDelay = 250; /* arbitrary loop count for Watcom/MSVC */
-#else
-FxU32 InitDelay = 25; /* in nanoseconds for POSIX/nanosleep */
-#endif
-
 /*
 ** sst1InitVideo():
 **  Initialize video (including DAC setup) for the specified resolution
@@ -65,12 +58,12 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitVideo(FxU32 *sstbase,
     FxU32 vInClkDel, vOutClkDel;
     FxU32 tf0_clk_del, tf1_clk_del, tf2_clk_del;
     FxU32 ft_clk_del;
-    extern FxU32 InitDelay;
 #ifndef DIRECTX
     float vidClkFreq;
 #endif
     const char *envp;
     int envval;
+    extern FxBool sst1CvgCompat;
 
     if(!sst)
         return(FXFALSE);
@@ -317,12 +310,6 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitVideo(FxU32 *sstbase,
         sst1CurrentBoard->fbiVideoRefresh = sst1MonitorRefresh;
     }
 
-    envp = GETENV(("SST_INITDELAY"));
-    if(envp) {
-        InitDelay = ATOI(envp);
-        INIT_PRINTF(("sst1InitVideo(): Setting InitDelay to %d\n", InitDelay));
-    }
-
     envp = GETENV(("SST_VIDEO_24BPP"));
     if(envp)
         sst1CurrentBoard->fbiVideo16BPP = (ATOI(envp)) ^ 0x1;
@@ -560,21 +547,30 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitVideo(FxU32 *sstbase,
                  sst1CurrentBoard->memFifoStatusLwm));  
 
     vInClkDel = 0;
+
     if((sst1MonitorRez == 960 && !video16BPP) ||
        (sst1MonitorRez == 640 && !video16BPP && sst1MonitorRefresh == 120) ||
        (sst1MonitorRez == 800 && !video16BPP && sst1MonitorRefresh == 75) ||
        (sst1MonitorRez == 800 && !video16BPP && sst1MonitorRefresh == 85))
         vInClkDel = 2;
+
     if(sst1CurrentBoard->fbiRevision == 2)
         vInClkDel = 0;
-    envp = GETENV(("SST_VIN_CLKDEL"));
-    if(envp && (SSCANF(envp, "%i", &vtmp) == 1))
-      vInClkDel = vtmp;
 
     if(sst1CurrentBoard->fbiRevision == 2)
         vOutClkDel = 2;
     else
         vOutClkDel = 0;
+
+    if (sst1CvgCompat) {
+      vInClkDel = 1;
+      vOutClkDel = 0;
+    }
+
+    envp = GETENV(("SST_VIN_CLKDEL"));
+    if(envp && (SSCANF(envp, "%i", &vtmp) == 1))
+      vInClkDel = vtmp;
+
     envp = GETENV(("SST_VOUT_CLKDEL"));
     if(envp && (SSCANF(envp, "%i", &vtmp) == 1))
       vOutClkDel = vtmp;
@@ -677,6 +673,12 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitVideo(FxU32 *sstbase,
         }
     }
 
+    if (sst1CvgCompat) {
+      ft_clk_del = 0x4;
+      tf0_clk_del = 0x6;
+      tf1_clk_del = 0x6;
+    }
+
     /* Override with environment variables */
     envp = GETENV(("SST_FT_CLK_DEL"));
     if(envp && (SSCANF(envp, "%i", &vtmp) == 1) )
@@ -690,6 +692,10 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitVideo(FxU32 *sstbase,
     envp = GETENV(("SST_TF2_CLK_DEL"));
     if(envp && (SSCANF(envp, "%i", &vtmp) == 1) )
       tf2_clk_del = vtmp;
+
+    if (sst1CvgCompat) {
+      INIT_PRINTF(("sst1InitVideo(): Clock delays adjusted for CVG chipset\n"));
+    }
 
     INIT_PRINTF(("sst1InitVideo(): Setting FBI-to-TREX clock delay to 0x%x...\n", ft_clk_del));
     INIT_PRINTF(("sst1InitVideo(): Setting TREX#0 TREX-to-FBI clock delay to 0x%x\n",

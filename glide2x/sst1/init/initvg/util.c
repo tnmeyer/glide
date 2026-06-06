@@ -149,7 +149,7 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitIdleFBINoNOP(FxU32 *sstbase)
     if(!sst)
         return(FXFALSE);
 
-    /* ISET(sst->nopCMD, 0x0); */
+    ISET(sst->nopCMD, 0x0);
     cntr = 0;
     while(1) {
         if(!(sst1InitReturnStatus(sstbase) & SST_FBI_BUSY)) {
@@ -166,13 +166,8 @@ FX_EXPORT FxU32 FX_CSTYLE sst1InitReturnStatus(FxU32 *sstbase)
 {
     volatile Sstregs *sst = (Sstregs *) sstbase;
     volatile FxU32 n;
-    extern FxU32 InitDelay;
 
-#if defined(__WATCOMC__) || defined(__MSC__)
-    for(n=0; n<InitDelay; n++) {}
-#elif defined(__GNUC__)
-    nanosleep((const struct timespec[]){{0, InitDelay}}, NULL);
-#endif
+    for(n=0; n<200; n++) {}
     return(IGET(sst->status));
 }
 

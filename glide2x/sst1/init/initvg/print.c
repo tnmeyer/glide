@@ -40,7 +40,6 @@ FX_ENTRY void FX_CALL sst1InitPrintf(const char *format, ...)
     va_list args;
     static FxBool firstPass = FXTRUE;
     static FxBool printIt = FXFALSE;
-
     if(firstPass == FXTRUE) {
         const char *envf;
         firstPass = FXFALSE;
@@ -49,7 +48,7 @@ FX_ENTRY void FX_CALL sst1InitPrintf(const char *format, ...)
 	  /* I couldn't initialize to stdout because stdout is not constant */
 	  sst1InitMsgFile = stdout;
 	}
-        if(GETENV(("SST_INITDEBUG")))
+       if(GETENV(("SST_INITDEBUG")))
             printIt = FXTRUE;
         envf = GETENV(("SST_INITDEBUG_FILE"));
         if(envf) {

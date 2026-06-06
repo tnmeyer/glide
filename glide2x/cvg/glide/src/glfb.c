@@ -1116,3 +1116,69 @@ GR_ENTRY(grLfbReadRegion, FxBool, (GrBuffer_t src_buffer,
 #undef FN_NAME
 }/* grLfbReadRegion */
 
+#if defined(GLIDE211_COMPAT)
+GrOriginLocation_t compat_origin;
+GrLfbWriteMode_t compat_mode;
+
+GR_ENTRY(grLfbBegin, void, (void))
+{
+    return;
+}
+
+GR_ENTRY(grLfbEnd, void, (void))
+{
+    return;
+}
+
+GR_ENTRY(grLfbGetReadPtr, const FxU32 *, (GrBuffer_t buffer))
+{
+    GrLfbInfo_t info;
+    FxU32 *rptr;
+    extern GrOriginLocation_t compat_origin;
+    extern GrLfbWriteMode_t compat_mode;
+
+
+    /* get a read pointer */
+    if ( grLfbLock( GR_LFB_READ_ONLY, buffer, compat_mode, compat_origin, FXFALSE, &info)) {
+	rptr = info.lfbPtr;
+    }
+    grLfbUnlock( GR_LFB_READ_ONLY, buffer );
+
+    return rptr;
+}
+
+GR_ENTRY(grLfbGetWritePtr, void *, (GrBuffer_t buffer))
+{
+    GrLfbInfo_t info;
+    FxU32 *rptr;
+    extern GrOriginLocation_t compat_origin;
+    extern GrLfbWriteMode_t compat_mode;
+
+    /* get a read pointer */
+    if ( grLfbLock( GR_LFB_WRITE_ONLY, buffer, compat_mode, compat_origin, FXFALSE, &info)) {
+	rptr = info.lfbPtr;
+    }
+    grLfbUnlock( GR_LFB_WRITE_ONLY, buffer );
+
+    return rptr;
+}
+
+GR_ENTRY(grLfbWriteMode, void, (GrLfbWriteMode_t mode))
+{
+    extern GrLfbWriteMode_t compat_mode;
+    compat_mode = mode;
+    return;
+}
+
+GR_ENTRY(grLfbBypassMode, void, (GrLfbBypassMode_t mode))
+{
+    return;
+}
+
+GR_ENTRY(grLfbOrigin, void, (GrOriginLocation_t origin))
+{
+    extern GrOriginLocation_t compat_origin;
+    compat_origin = origin;
+    return;
+}
+#endif
